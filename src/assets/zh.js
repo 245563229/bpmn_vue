@@ -11,6 +11,7 @@ export default {
     'Divide into three Lanes': '分割成三个道',
     'Add Lane below': '在下面添加道',
     'Append compensation activity': '追加补偿活动',
+    'Append TextAnnotation': '附加文本注释',
     'Change type': '修改类型',
     'Connect using Association': '使用关联连接',
     'Connect using Sequence/MessageFlow or Association': '使用顺序/消息流或者关联连接',
