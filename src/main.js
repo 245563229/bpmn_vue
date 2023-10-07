@@ -7,5 +7,5 @@ import 'bpmn-js/dist/assets/bpmn-font/css/bpmn.css'
 import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-codes.css'
 import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css'
 // bpmn右边工具栏样式
-// import 'bpmn-js-properties-panel/dist/assets/bpmn-js-properties-panel.css'
+import '@bpmn-io/properties-panel/dist/assets/properties-panel.css'
 createApp(App).mount('#app')

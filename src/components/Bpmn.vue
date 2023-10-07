@@ -17,6 +17,7 @@ import {
   BpmnPropertiesPanelModule,
   BpmnPropertiesProviderModule,
 } from 'bpmn-js-properties-panel';
+//模拟数据
 import {xmlStr} from '../mock/xmlStr'
 const canvasBpmn = ref()
 const properties = ref()
@@ -71,7 +72,7 @@ onMounted(() => {
     position: absolute;
     right: 0;
     top: 20px;
-    padding: 30px;
+    padding: 10px;
     background-color: #eeeeee;
   }
 }
