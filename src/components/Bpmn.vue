@@ -1,11 +1,12 @@
 <template>
   <div class="nav">
     <a hidden ref="downloadLink"></a>
-    <button @click="createXml">
-      新建流程
-    </button>
-    <button @click="importXml">
+<!--    <button @click="createNewDiagram">-->
+<!--      新建流程-->
+<!--    </button>-->
+    <button>
       导入流程
+      <input type="file" @change="importXml"/>
     </button>
     <button @click="exportXml">
       导出XML
@@ -25,9 +26,9 @@
     <button @click="handlerZoom(-0.2)">
       缩小
     </button>
-<!--    <button @click="viewXml">-->
-<!--      xml预览-->
-<!--    </button>-->
+    <!--    <button @click="viewXml">-->
+    <!--      xml预览-->
+    <!--    </button>-->
     <button @click="viewSvg">
       svg预览
     </button>
@@ -37,9 +38,9 @@
     <div class="canvas" ref="canvasBpmn" id="canvasBpmn"></div>
     <!--    侧边栏区域-->
     <div class="properties" ref="properties"></div>
-<!--    <div v-if="showView" class="showViewClass" ref="shouViewDiv">-->
-<!--      <pre>{{ bpmnValue }}<code></code></pre>-->
-<!--    </div>-->
+    <!--    <div v-if="showView" class="showViewClass" ref="shouViewDiv">-->
+    <!--      <pre>{{ bpmnValue }}<code></code></pre>-->
+    <!--    </div>-->
     <div v-if="showView" class="showViewClass" ref="shouViewDiv">
       <button class="closeView" @click="showView=false">关闭预览</button>
       <div style="text-align: center;" v-html="bpmnValue"></div>
@@ -59,6 +60,7 @@ import {
 } from 'bpmn-js-properties-panel';
 //模拟数据
 import {xmlStr} from '../mock/xmlStr'
+
 const downloadLink = ref()
 const canvasBpmn = ref()
 const properties = ref()
@@ -74,7 +76,7 @@ const state = reactive({
   bpmnModeler: null,
   container: null,
   //放大倍率
-  scale:1
+  scale: 1
 })
 const createNewDiagram = (data) => {
   let strValue = xmlStr
@@ -105,8 +107,19 @@ const init = () => {
   })
   createNewDiagram()
 }
+//导入流程
+const importXml = (e) => {
+  console.log(e.target.files[0])
+  const newFile = e.target.files[0]
+  const reader = new FileReader()
+  reader.readAsText(newFile, "UTF-8")
+  reader.onload = () => {
+    createNewDiagram(reader.result)
+  }
+  return false
+}
 //下载相关
-const download=({ name = "diagram.bpmn", data })=> {
+const download = ({name = "diagram.bpmn", data}) => {
   // 这里就获取到了之前设置的隐藏链接
   const downloadLinks = downloadLink.value;
   // 把输就转换为URI，下载要用到的
@@ -136,7 +149,7 @@ const exportXml = async () => {
 }
 // 导出svg
 
-const exportSvg = async ()=>{
+const exportSvg = async () => {
   console.log('点击导出svg')
   try {
     // const { xml } =await state.bpmnModeler.saveXML({ format: true });
@@ -164,32 +177,32 @@ const exportSvg = async ()=>{
           </svg>
         `;
     // 将文件名以及数据交给下载方法
-    download({ name: name, data: svg });
+    download({name: name, data: svg});
   } catch (error) {
     console.error('下载Svg失败，请重试')
   }
 }
 // 撤销
-const handelCancel = ()=>{
+const handelCancel = () => {
   console.log('点击撤销')
   state.bpmnModeler.get("commandStack").undo();
 
 }
 //恢复
-const handelReset = ()=>{
+const handelReset = () => {
   console.log('点击恢复')
   state.bpmnModeler.get("commandStack").redo()
 }
 //放大/缩小
-const handlerZoom = (radio)=> {
+const handlerZoom = (radio) => {
   const newScale = !radio ? 1.0 : state.scale + radio;
   state.bpmnModeler.get("canvas").zoom(newScale);
   state.scale = newScale;
 }
 // 预览Xml
-const viewXml = async ()=>{
+const viewXml = async () => {
   try {
-    const { xml } = await state.bpmnModeler.saveXML({ format: true });
+    const {xml} = await state.bpmnModeler.saveXML({format: true});
     bpmnValue.value = xml
     showView.value = true
   } catch (error) {
@@ -197,14 +210,14 @@ const viewXml = async ()=>{
   }
 }
 // 预览svg
-const viewSvg = async ()=>{
-    try {
-      const { svg } = await state.bpmnModeler.saveSVG();
-      bpmnValue.value = svg
-      showView.value = true
-    } catch (error) {
-      console.error('预览失败，请重试')
-    }
+const viewSvg = async () => {
+  try {
+    const {svg} = await state.bpmnModeler.saveSVG();
+    bpmnValue.value = svg
+    showView.value = true
+  } catch (error) {
+    console.error('预览失败，请重试')
+  }
 }
 onMounted(() => {
   init()
@@ -241,7 +254,8 @@ onMounted(() => {
     padding: 10px;
     background-color: #eeeeee;
   }
-  .showViewClass{
+
+  .showViewClass {
     position: absolute;
     z-index: 2;
     width: 800px;
@@ -252,11 +266,12 @@ onMounted(() => {
     display: flex;
     justify-content: center;
     align-items: center;
-.closeView{
-  position: absolute;
-  right: 0;
-  top: 0;
-}
+
+    .closeView {
+      position: absolute;
+      right: 0;
+      top: 0;
+    }
   }
 }
 </style>

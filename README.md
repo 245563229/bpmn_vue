@@ -1,4 +1,4 @@
-# 使用准备
+# 使用说明
 必须项，在高版本bpmn中（当前14.0）右侧属性栏需求文件已经和低版本不同  
 yarn add @bpmn-io/properties-panel  
 必须项，bpmn核心组件  
