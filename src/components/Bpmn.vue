@@ -1,9 +1,9 @@
 <template>
   <div class="nav">
     <a hidden ref="downloadLink"></a>
-<!--    <button @click="createNewDiagram">-->
-<!--      新建流程-->
-<!--    </button>-->
+    <!--    <button @click="createNewDiagram">-->
+    <!--      新建流程-->
+    <!--    </button>-->
     <button>
       导入流程
       <input type="file" @change="importXml"/>
@@ -152,7 +152,7 @@ const exportXml = async () => {
 const exportSvg = async () => {
   console.log('点击导出svg')
   try {
-    // const { xml } =await state.bpmnModeler.saveXML({ format: true });
+    const {xml} = await state.bpmnModeler.saveXML({format: true});
     // 获取文件名
     const name = `流程图.svg`;
     // 从建模器画布中提取svg图形标签
@@ -168,7 +168,7 @@ const exportSvg = async () => {
     // 将标签和数据拼接成一个完整正常的svg图形
     const svg = `
           <svg
-            xmlns="http://www.gfh.org/2000/svg"
+            xmlns="http://www.w3.org/2000/svg"
             width="${viewport.width}"
             height="${viewport.height}"
             viewBox="${viewport.x} ${viewport.y} ${viewport.width} ${viewport.height}"
