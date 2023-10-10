@@ -1,5 +1,5 @@
 <template>
-<Bpmn></Bpmn>
+  <Bpmn></Bpmn>
 </template>
 <script setup>
 import Bpmn from './components/Bpmn.vue'
