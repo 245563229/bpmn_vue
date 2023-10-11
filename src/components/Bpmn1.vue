@@ -59,7 +59,7 @@ import {
   BpmnPropertiesProviderModule,
 } from 'bpmn-js-properties-panel';
 //模拟数据
-import {xmlStr} from '../mock/xmlStr'
+import {xmlStr} from '../mock/xmlStr.js'
 
 const downloadLink = ref()
 const canvasBpmn = ref()

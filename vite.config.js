@@ -1,12 +1,12 @@
 // vite.config.js
 import { defineConfig } from 'vite'
 import path from 'path'
-
+import vueSetupExtend from 'vite-plugin-vue-setup-extend'
 import vue from "@vitejs/plugin-vue";
 export default defineConfig(()=>{
   return {
     plugins:[
-        vue(),
+        vue(),vueSetupExtend()
     ],
     resolve: {
       extensions: ['.js', '.ts', '.json'], // 导入时想要省略的扩展名列表
