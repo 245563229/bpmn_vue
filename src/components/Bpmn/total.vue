@@ -1,113 +1,53 @@
 <template>
-  <div class="nav">
+  <div class="totalClass">
     <a hidden ref="downloadLink"></a>
-    <!--    <button @click="createNewDiagram">-->
-    <!--      新建流程-->
-    <!--    </button>-->
-    <button>
+    <el-button>
       导入流程
       <input type="file" @change="importXml"/>
-    </button>
-    <button @click="exportXml">
+    </el-button>
+    <el-button @click="exportXml" type="info">
       导出XML
-    </button>
-    <button @click="exportSvg">
+    </el-button>
+    <el-button @click="exportSvg" type="info">
       下载svg
-    </button>
-    <button @click="handelCancel">
-      撤销
-    </button>
-    <button @click="handelReset">
-      恢复
-    </button>
-    <button @click="handlerZoom(0.2)">
-      放大
-    </button>
-    <button @click="handlerZoom(-0.2)">
-      缩小
-    </button>
-    <!--    <button @click="viewXml">-->
-    <!--      xml预览-->
-    <!--    </button>-->
-    <button @click="viewSvg">
+    </el-button>
+    <el-button @click="viewSvg" type="info">
       svg预览
-    </button>
+    </el-button>
+    <el-button @click="handelCancel" type="danger">
+      撤销
+    </el-button>
+    <el-button @click="handelReset" type="warning">
+      恢复
+    </el-button>
+    <el-button @click="handlerZoom(0.2)" type="primary">
+      放大
+    </el-button>
+    <el-button @click="handlerZoom(-0.2)" type="primary">
+      缩小
+    </el-button>
+    <!--    <el-button @click="viewXml">-->
+    <!--      xml预览-->
+    <!--    </el-button>-->
+
   </div>
-  <div class="content">
-    <!--    画布区域-->
-    <div class="canvas" ref="canvasBpmn" id="canvasBpmn"></div>
-    <!--    侧边栏区域-->
-    <div class="properties" ref="properties"></div>
-    <!--    <div v-if="showView" class="showViewClass" ref="shouViewDiv">-->
-    <!--      <pre>{{ bpmnValue }}<code></code></pre>-->
-    <!--    </div>-->
-    <div v-if="showView" class="showViewClass" ref="shouViewDiv">
-      <button class="closeView" @click="showView=false">关闭预览</button>
-      <div style="text-align: center;" v-html="bpmnValue"></div>
-    </div>
+  <div v-if="showView" class="showViewClass" ref="shouViewDiv">
+    <button class="closeView" @click="showView=false">关闭预览</button>
+    <div style="text-align: center;" v-html="bpmnValue"></div>
   </div>
 </template>
 <script setup>
 import {ref, reactive, onMounted} from 'vue'
-//bpmn汉化
-import translate from '../assets/translations.js'
-// 引入bpmn
-import BpmnModeler from 'bpmn-js/lib/Modeler'
-//引入bpmn侧边栏
-import {
-  BpmnPropertiesPanelModule,
-  BpmnPropertiesProviderModule,
-} from 'bpmn-js-properties-panel';
-//模拟数据
-import {xmlStr} from '../mock/xmlStr.js'
-
-const downloadLink = ref()
-const canvasBpmn = ref()
-const properties = ref()
 const shouViewDiv = ref()
-//预览弹窗
-const showView = ref(false)
-// 只读模式
-const onRead = ref(false)
-//编辑器内容
-const bpmnValue = ref()
 const state = reactive({
   //bpmn建模
   bpmnModeler: null,
-  container: null,
   //放大倍率
   scale: 1
 })
-const createNewDiagram = (data) => {
-  let strValue = xmlStr
-  if (data) {
-    strValue = data
-  }
-  try {
-    state.bpmnModeler.importXML(strValue)
-  } catch (err) {
-    console.log(err.message, err.warnings)
-  }
-}
-const init = () => {
-  const canvas = canvasBpmn.value
-  const proper = properties.value
-  state.bpmnModeler = new BpmnModeler({
-    container: canvas,
-    //控制板
-    propertiesPanel: {
-      parent: proper
-    },
-    additionalModules: [
-      BpmnPropertiesPanelModule,
-      BpmnPropertiesProviderModule,
-      {translate: ['value', translate]}
-    ]
-
-  })
-  createNewDiagram()
-}
-//导入流程
+const props = defineProps({
+  BpmnModeler:{z}
+})
 const importXml = (e) => {
   console.log(e.target.files[0])
   const newFile = e.target.files[0]
@@ -220,58 +160,15 @@ const viewSvg = async () => {
   }
 }
 onMounted(() => {
-  init()
 })
 </script>
 <style lang='scss' scoped>
-.nav {
-  height: 50px;
+.totalClass{
   position: absolute;
+  display: flex;
+  z-index: 2;
+  height: 50px;
   top: 0;
   left: 0;
-
-  button {
-    margin-right: 10px;
-  }
-}
-
-.content {
-  position: absolute;
-  width: 100%;
-  height: calc(100% - 50px);
-  top: 50px;
-  left: 0;
-
-  .canvas {
-    width: 100%;
-    height: 100%;
-  }
-
-  .properties {
-    position: absolute;
-    right: 0;
-    top: 20px;
-    padding: 10px;
-    background-color: #eeeeee;
-  }
-
-  .showViewClass {
-    position: absolute;
-    z-index: 2;
-    width: 800px;
-    height: 600px;
-    top: calc(50% - 300px);
-    left: calc(50% - 400px);
-    background-color: #f9f9f9;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    .closeView {
-      position: absolute;
-      right: 0;
-      top: 0;
-    }
-  }
 }
 </style>

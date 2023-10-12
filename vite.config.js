@@ -6,7 +6,7 @@ import vue from "@vitejs/plugin-vue";
 export default defineConfig(()=>{
   return {
     plugins:[
-        vue(),vueSetupExtend()
+        vue(),vueSetupExtend(),
     ],
     resolve: {
       extensions: ['.js', '.ts', '.json'], // 导入时想要省略的扩展名列表

@@ -1,22 +1,5 @@
 import { defineStore } from 'pinia'
-import { Moddle } from 'moddle'
-import { Base } from 'diagram-js/lib/model'
-import Modeler from 'bpmn-js/lib/Modeler'
-import Modeling from 'bpmn-js/lib/features/modeling/Modeling.js'
-import Canvas from 'diagram-js/lib/core/Canvas'
-import ElementRegistry from 'diagram-js/lib/core/ElementRegistry'
-
-type ModelerStore = {
-  activeElement: Base | undefined
-  activeElementId: string | undefined
-  modeler: Modeler | null
-  moddle: Moddle | null
-  modeling: Modeling | null
-  canvas: Canvas | null
-  elementRegistry: ElementRegistry | null
-}
-
-const defaultState: ModelerStore = {
+const defaultState = {
   activeElement: undefined,
   activeElementId: undefined,
   modeler: null,
@@ -41,10 +24,10 @@ export default defineStore('modeler', {
     setModeler(modeler) {
       this.modeler = modeler
     },
-    setModules<K extends keyof ModelerStore>(key: K, module) {
+    setModules(key, module) {
       this[key] = module
     },
-    setElement(element: Base, id: string) {
+    setElement(element, id) {
       this.activeElement = element
       this.activeElementId = id
     }

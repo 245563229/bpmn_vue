@@ -18,6 +18,7 @@
     "element-plus": "^2.3.14",
     "pinia": "^2.1.6",
     "sass": "^1.69.0",
+    "vite-plugin-require-transform": "^1.0.21",
     "vue": "^3.3.4"
   },
   "devDependencies": {
