@@ -49,11 +49,80 @@
       v-model="drawer"
       direction="btt"
       :before-close="handleDrawerClose"
+      custom-class="drawerClass"
+      size="40%"
     >
-      <div>
-<div>
-
-</div>
+      <template #header>
+        <div class="headerClass">
+          用户任务
+        </div>
+      </template>
+      <div class="drawerContentClass">
+        <el-form style="width: 100%;" :model="state.taskData" label-width="120px" :inline="true">
+          <el-row :gutter="24">
+            <el-col :span="8">
+              <el-form-item label="处理人类型">
+                <div>
+                  <el-radio-group v-model="state.taskData.executeType" class="ml-4">
+                    <el-radio label="1" size="large">按角色</el-radio>
+                    <el-radio label="2" size="large">按部门</el-radio>
+                    <el-radio label="3" size="large">按用户</el-radio>
+                  </el-radio-group>
+                </div>
+              </el-form-item>
+              <el-form-item label="处理人">
+                <el-select v-model="state.taskData.execute" class="m-2" placeholder="Select" size="large">
+                  <el-option label="测试1" value="1"/>
+                  <el-option label="测试2" value="2"/>
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="是否可以退回">
+                <div class="mb-2 flex items-center text-sm">
+                  <el-radio-group v-model="state.taskData.resetWhether" class="ml-4">
+                    <el-radio label="1" size="large">是</el-radio>
+                    <el-radio label="2" size="large">否</el-radio>
+                  </el-radio-group>
+                </div>
+              </el-form-item>
+              <el-form-item label="是否可以结束流程">
+                <div class="mb-2 flex items-center text-sm">
+                  <el-radio-group v-model="state.taskData.overWhether" class="ml-4">
+                    <el-radio label="1" size="large">是</el-radio>
+                    <el-radio label="2" size="large">否</el-radio>
+                  </el-radio-group>
+                </div>
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="进入条件">
+                <el-input
+                  v-model="state.taskData.inputIf"
+                  :rows="2"
+                  type="textarea"
+                  placeholder="请输入进入条件"
+                />
+              </el-form-item>
+              <el-form-item label="完成条件">
+                <el-input
+                  v-model="state.taskData.outputIf"
+                  :rows="2"
+                  type="textarea"
+                  placeholder="请输入完成条件"
+                />
+              </el-form-item>
+              <el-form-item label="结束条件">
+                <el-input
+                  v-model="state.taskData.overIf"
+                  :rows="2"
+                  type="textarea"
+                  placeholder="请输入结束条件"
+                />
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </el-form>
       </div>
     </el-drawer>
   </div>
@@ -71,6 +140,10 @@ import {
 } from 'bpmn-js-properties-panel';
 //初始数据
 import {xmlStr} from '../mock/xmlStr.js'
+// 引入pinia
+import taskData from '@/store/taskData.js'
+
+const taskDateStore = taskData()
 const downloadLink = ref()
 const canvasBpmn = ref()
 const properties = ref()
@@ -90,16 +163,31 @@ const state = reactive({
   //放大倍率
   scale: 1,
   // 用户框额外数据
-  taskData :
+  taskData:
     {
-      id:'',
-      executeType:'',
-      execute:'',
-      inputIf:'',
-      outputIf:'',
-      overIf:'',
+      id: '',
+      executeType: '',
+      execute: '',
+      inputIf: '',
+      outputIf: '',
+      overIf: '',
+      resetWhether: '',
+      overWhether: ''
     }
 })
+// 重置state.taskData
+const reset = () => {
+  state.taskData = {
+    id: '',
+    executeType: '',
+    execute: '',
+    inputIf: '',
+    outputIf: '',
+    overIf: '',
+    resetWhether: '',
+    overWhether: ''
+  }
+}
 const createNewDiagram = (data) => {
   let strValue = xmlStr
   if (data) {
@@ -116,6 +204,8 @@ const init = () => {
   const proper = properties.value
   state.bpmnModeler = new BpmnModeler({
     container: canvas,
+    //只读
+    readOnly:true,
     //控制板
     propertiesPanel: {
       parent: proper
@@ -123,8 +213,16 @@ const init = () => {
     additionalModules: [
       BpmnPropertiesPanelModule,
       BpmnPropertiesProviderModule,
-      {translate: ['value', translate]}
-    ],
+      {translate: ['value', translate]},
+      {
+        paletteProvider: ["value", ''], //禁用/清空左侧工具栏
+        labelEditingProvider: ["value", ''], //禁用节点编辑
+        contextPadProvider: ["value", ''], //禁用图形菜单
+        bendpoints: ["value", {}], //禁用连线拖动
+        zoomScroll: ["value", ''], //禁用滚动
+        moveCanvas: ['value', ''], //禁用拖动整个流程图
+        move: ['value', ''], //禁用单个图形拖动
+  }]
   })
   createNewDiagram()
   const eventBus = state.bpmnModeler.get('eventBus');
@@ -143,13 +241,19 @@ const init = () => {
           //   (item) => item.type === 'bpmn:UserTask'
           // );
           // console.log('userTaskList',userTaskList)
-          if (element.type == "bpmn:UserTask"){
+          if (element.type === "bpmn:UserTask") {
+            reset()
+            const storeData = taskDateStore.taskData.find(item => item.id === element.id)
+            if (storeData) {
+              state.taskData = storeData
+            } else {
+              state.taskData.id = element.id
+            }
             drawer.value = true
-            state.taskData.id  = element.id
           }
           // 节点点击后想要做的处理
           // 此时想要点击节点后，拿到节点实例，通过外部输入更新节点名称
-          console.log('ssss',element)
+          console.log('ssss', element)
         }
       }
     });
@@ -268,9 +372,22 @@ const viewSvg = async () => {
     console.error('预览失败，请重试')
   }
 }
+// 销毁bpmn
+const destroyBpmn = () =>{
+  state.bpmnModeler.destroy()
+}
 // Drawer关闭
-const handleDrawerClose = ()=>{
+const handleDrawerClose = () => {
+  console.log('taskData', taskDateStore.taskData)
   console.log('关闭抽屉获取数据',)
+  const index = taskDateStore.taskData.findIndex((item) => item.id === state.taskData.id)
+  console.log('index', index)
+  if (index >= 0) {
+    taskDateStore.editElement(index, state.taskData)
+  } else {
+    taskDateStore.setElement(state.taskData)
+  }
+  drawer.value = false
 }
 
 onMounted(() => {
@@ -325,6 +442,27 @@ onMounted(() => {
       position: absolute;
       right: 0;
       top: 0;
+    }
+  }
+}
+
+
+.drawerClass {
+  .headerClass {
+    font-weight: 700;
+  }
+
+  .drawerContentClass {
+    display: flex;
+
+    .leftClass {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .rightClass {
+      display: flex;
+      flex-direction: column;
     }
   }
 }

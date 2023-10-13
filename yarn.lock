@@ -1103,7 +1103,7 @@ picomatch@^2.0.4, picomatch@^2.2.1:
 
 pinia@^2.1.6:
   version "2.1.6"
-  resolved "https://registry.npmmirror.com/pinia/-/pinia-2.1.6.tgz"
+  resolved "https://registry.npmmirror.com/pinia/-/pinia-2.1.6.tgz#e88959f14b61c4debd9c42d0c9944e2875cbe0fa"
   integrity sha512-bIU6QuE5qZviMmct5XwCesXelb5VavdOWKWaB17ggk++NUwQWWbP5YnsONTk3b752QkW9sACiR81rorpeOMSvQ==
   dependencies:
     "@vue/devtools-api" "^6.5.0"
