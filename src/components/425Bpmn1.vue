@@ -140,7 +140,7 @@ import {
 } from 'bpmn-js-properties-panel';
 //初始数据
 import {xmlStr} from '../mock/xmlStr.js'
-// 引入pinia
+// 引入 pinia
 import taskData from '@/store/taskData.js'
 
 const taskDateStore = taskData()
