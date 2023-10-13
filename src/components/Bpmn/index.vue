@@ -1,37 +1,37 @@
 <template>
   <div class="nav">
     <a hidden ref="downloadLink"></a>
-    <!--    <button @click="createNewDiagram">-->
+    <!--    <el-button type='info' @click="createNewDiagram">-->
     <!--      新建流程-->
-    <!--    </button>-->
-    <button>
+    <!--    </el-button>-->
+    <el-button type='info'>
       导入流程
       <input type="file" @change="importXml"/>
-    </button>
-    <button @click="exportXml">
+    </el-button>
+    <el-button type='info' @click="exportXml">
       导出XML
-    </button>
-    <button @click="exportSvg">
+    </el-button>
+    <el-button type='info' @click="exportSvg">
       下载svg
-    </button>
-    <button @click="handelCancel">
+    </el-button>
+    <el-button type='info' @click="handelCancel">
       撤销
-    </button>
-    <button @click="handelReset">
+    </el-button>
+    <el-button type='info' @click="handelReset">
       恢复
-    </button>
-    <button @click="handlerZoom(0.2)">
+    </el-button>
+    <el-button type='info' @click="handlerZoom(0.2)">
       放大
-    </button>
-    <button @click="handlerZoom(-0.2)">
+    </el-button>
+    <el-button type='info' @click="handlerZoom(-0.2)">
       缩小
-    </button>
-    <!--    <button @click="viewXml">-->
+    </el-button>
+    <!--    <el-button type='info' @click="viewXml">-->
     <!--      xml预览-->
-    <!--    </button>-->
-    <button @click="viewSvg">
+    <!--    </el-button>-->
+    <el-button type='info' @click="viewSvg">
       svg预览
-    </button>
+    </el-button>
   </div>
   <div class="content">
     <!--    画布区域-->
@@ -42,7 +42,7 @@
     <!--      <pre>{{ bpmnValue }}<code></code></pre>-->
     <!--    </div>-->
     <div v-if="showView" class="showViewClass" ref="shouViewDiv">
-      <button class="closeView" @click="showView=false">关闭预览</button>
+      <el-button type='info' class="closeView" @click="showView=false">关闭预览</el-button>
       <div style="text-align: center;" v-html="bpmnValue"></div>
     </div>
     <el-drawer
@@ -129,8 +129,6 @@
 </template>
 <script setup>
 import {ref, reactive, onMounted} from 'vue'
-//bpmn汉化
-import translate from '../assets/translations.js'
 // 引入bpmn
 import BpmnModeler from 'bpmn-js/lib/Modeler'
 //引入bpmn侧边栏
@@ -139,10 +137,11 @@ import {
   BpmnPropertiesProviderModule,
 } from 'bpmn-js-properties-panel';
 //初始数据
-import {xmlStr} from '../mock/xmlStr.js'
-// 引入 pinia
-import taskData from '@/store/taskData.js'
-
+import {xmlStr} from './mock/xmlStr.js'
+import {readOnlyJs} from './mock/readOnly.js'
+import {editCreateJs} from './mock/editCreate.js'
+// 引入pinia
+import taskData from './store/taskData.js'
 const taskDateStore = taskData()
 const downloadLink = ref()
 const canvasBpmn = ref()
@@ -204,25 +203,16 @@ const init = () => {
   const proper = properties.value
   state.bpmnModeler = new BpmnModeler({
     container: canvas,
-    //只读
-    readOnly:true,
     //控制板
     propertiesPanel: {
       parent: proper
     },
     additionalModules: [
       BpmnPropertiesPanelModule,
-      BpmnPropertiesProviderModule,
-      {translate: ['value', translate]},
-      {
-        paletteProvider: ["value", ''], //禁用/清空左侧工具栏
-        labelEditingProvider: ["value", ''], //禁用节点编辑
-        contextPadProvider: ["value", ''], //禁用图形菜单
-        bendpoints: ["value", {}], //禁用连线拖动
-        zoomScroll: ["value", ''], //禁用滚动
-        moveCanvas: ['value', ''], //禁用拖动整个流程图
-        move: ['value', ''], //禁用单个图形拖动
-  }]
+      onRead.value ? '' : BpmnPropertiesProviderModule,
+      onRead.value ? {...readOnlyJs} :
+        {...editCreateJs},
+    ]
   })
   createNewDiagram()
   const eventBus = state.bpmnModeler.get('eventBus');
@@ -373,7 +363,7 @@ const viewSvg = async () => {
   }
 }
 // 销毁bpmn
-const destroyBpmn = () =>{
+const destroyBpmn = () => {
   state.bpmnModeler.destroy()
 }
 // Drawer关闭

@@ -1,4 +1,4 @@
-import translations from "./zh";
+import translations from "./zh.js";
 
 export default function customTranslate(template, replacements) {
     replacements = replacements || {};
