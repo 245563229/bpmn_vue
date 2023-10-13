@@ -1,130 +1,22 @@
 <template>
-  <div class="nav">
-    <a hidden ref="downloadLink"></a>
-    <!--    <el-button type='info' @click="createNewDiagram">-->
-    <!--      新建流程-->
-    <!--    </el-button>-->
-    <el-button type='info'>
-      导入流程
-      <input type="file" @change="importXml"/>
-    </el-button>
-    <el-button type='info' @click="exportXml">
-      导出XML
-    </el-button>
-    <el-button type='info' @click="exportSvg">
-      下载svg
-    </el-button>
-    <el-button type='info' @click="handelCancel">
-      撤销
-    </el-button>
-    <el-button type='info' @click="handelReset">
-      恢复
-    </el-button>
-    <el-button type='info' @click="handlerZoom(0.2)">
-      放大
-    </el-button>
-    <el-button type='info' @click="handlerZoom(-0.2)">
-      缩小
-    </el-button>
-    <!--    <el-button type='info' @click="viewXml">-->
-    <!--      xml预览-->
-    <!--    </el-button>-->
-    <el-button type='info' @click="viewSvg">
-      svg预览
-    </el-button>
-  </div>
+<Total :bpmnModeler="state.bpmnModeler" :canvasBpmn="canvasBpmn">
+  <el-button type='info'>
+    导入流程
+    <input type="file" @change="importXml"/>
+  </el-button>
+  <el-button type='info' @click="saveX">
+    测试保存去空
+
+  </el-button>
+</Total>
   <div class="content">
     <!--    画布区域-->
     <div class="canvas" ref="canvasBpmn" id="canvasBpmn"></div>
     <!--    侧边栏区域-->
     <div class="properties" ref="properties"></div>
-    <!--    <div v-if="showView" class="showViewClass" ref="shouViewDiv">-->
-    <!--      <pre>{{ bpmnValue }}<code></code></pre>-->
-    <!--    </div>-->
-    <div v-if="showView" class="showViewClass" ref="shouViewDiv">
-      <el-button type='info' class="closeView" @click="showView=false">关闭预览</el-button>
-      <div style="text-align: center;" v-html="bpmnValue"></div>
-    </div>
-    <el-drawer
-      v-model="drawer"
-      direction="btt"
-      :before-close="handleDrawerClose"
-      custom-class="drawerClass"
-      size="40%"
-    >
-      <template #header>
-        <div class="headerClass">
-          用户任务
-        </div>
-      </template>
-      <div class="drawerContentClass">
-        <el-form style="width: 100%;" :model="state.taskData" label-width="120px" :inline="true">
-          <el-row :gutter="24">
-            <el-col :span="8">
-              <el-form-item label="处理人类型">
-                <div>
-                  <el-radio-group v-model="state.taskData.executeType" class="ml-4">
-                    <el-radio label="1" size="large">按角色</el-radio>
-                    <el-radio label="2" size="large">按部门</el-radio>
-                    <el-radio label="3" size="large">按用户</el-radio>
-                  </el-radio-group>
-                </div>
-              </el-form-item>
-              <el-form-item label="处理人">
-                <el-select v-model="state.taskData.execute" class="m-2" placeholder="Select" size="large">
-                  <el-option label="测试1" value="1"/>
-                  <el-option label="测试2" value="2"/>
-                </el-select>
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
-              <el-form-item label="是否可以退回">
-                <div class="mb-2 flex items-center text-sm">
-                  <el-radio-group v-model="state.taskData.resetWhether" class="ml-4">
-                    <el-radio label="1" size="large">是</el-radio>
-                    <el-radio label="2" size="large">否</el-radio>
-                  </el-radio-group>
-                </div>
-              </el-form-item>
-              <el-form-item label="是否可以结束流程">
-                <div class="mb-2 flex items-center text-sm">
-                  <el-radio-group v-model="state.taskData.overWhether" class="ml-4">
-                    <el-radio label="1" size="large">是</el-radio>
-                    <el-radio label="2" size="large">否</el-radio>
-                  </el-radio-group>
-                </div>
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
-              <el-form-item label="进入条件">
-                <el-input
-                  v-model="state.taskData.inputIf"
-                  :rows="2"
-                  type="textarea"
-                  placeholder="请输入进入条件"
-                />
-              </el-form-item>
-              <el-form-item label="完成条件">
-                <el-input
-                  v-model="state.taskData.outputIf"
-                  :rows="2"
-                  type="textarea"
-                  placeholder="请输入完成条件"
-                />
-              </el-form-item>
-              <el-form-item label="结束条件">
-                <el-input
-                  v-model="state.taskData.overIf"
-                  :rows="2"
-                  type="textarea"
-                  placeholder="请输入结束条件"
-                />
-              </el-form-item>
-            </el-col>
-          </el-row>
-        </el-form>
-      </div>
-    </el-drawer>
+    <Drawer ref="drawer" :drawerView="drawerView" :taskId="state.taskId"
+            @closeDrawer="closeDrawer"
+    />
   </div>
 </template>
 <script setup>
@@ -136,6 +28,10 @@ import {
   BpmnPropertiesPanelModule,
   BpmnPropertiesProviderModule,
 } from 'bpmn-js-properties-panel';
+// 引入头部组件
+import Total from './components/Total.vue'
+// 引入底部抽屉
+import Drawer from "./components/Drawer.vue";
 //初始数据
 import {xmlStr} from './mock/xmlStr.js'
 import {readOnlyJs} from './mock/readOnly.js'
@@ -143,57 +39,28 @@ import {editCreateJs} from './mock/editCreate.js'
 // 引入pinia
 import taskData from './store/taskData.js'
 const taskDateStore = taskData()
-const downloadLink = ref()
 const canvasBpmn = ref()
 const properties = ref()
-const shouViewDiv = ref()
+const drawer = ref()
 //数据drawer
-const drawer = ref(false)
-//预览弹窗
-const showView = ref(false)
+const drawerView = ref(false)
 // 只读模式
 const onRead = ref(false)
-//编辑器内容
-const bpmnValue = ref()
 const state = reactive({
   //bpmn建模
   bpmnModeler: null,
   container: null,
-  //放大倍率
-  scale: 1,
-  // 用户框额外数据
-  taskData:
-    {
-      id: '',
-      executeType: '',
-      execute: '',
-      inputIf: '',
-      outputIf: '',
-      overIf: '',
-      resetWhether: '',
-      overWhether: ''
-    }
+  //选中的任务ID
+  taskId:''
 })
-// 重置state.taskData
-const reset = () => {
-  state.taskData = {
-    id: '',
-    executeType: '',
-    execute: '',
-    inputIf: '',
-    outputIf: '',
-    overIf: '',
-    resetWhether: '',
-    overWhether: ''
-  }
-}
+
 const createNewDiagram = (data) => {
   let strValue = xmlStr
   if (data) {
     strValue = data
   }
   try {
-    state.bpmnModeler.importXML(strValue)
+   state.bpmnModeler.importXML(strValue)
   } catch (err) {
     console.log(err.message, err.warnings)
   }
@@ -232,25 +99,15 @@ const init = () => {
           // );
           // console.log('userTaskList',userTaskList)
           if (element.type === "bpmn:UserTask") {
-            reset()
-            const storeData = taskDateStore.taskData.find(item => item.id === element.id)
-            if (storeData) {
-              state.taskData = storeData
-            } else {
-              state.taskData.id = element.id
-            }
-            drawer.value = true
+            state.taskId = element.id
+            drawerView.value = false
+            drawerView.value = true
           }
-          // 节点点击后想要做的处理
-          // 此时想要点击节点后，拿到节点实例，通过外部输入更新节点名称
-          console.log('ssss', element)
         }
       }
     });
   });
-
 }
-//导入流程
 const importXml = (e) => {
   console.log(e.target.files[0])
   const newFile = e.target.files[0]
@@ -261,141 +118,26 @@ const importXml = (e) => {
   }
   return false
 }
-//下载相关
-const download = ({name = "diagram.bpmn", data}) => {
-  // 这里就获取到了之前设置的隐藏链接
-  const downloadLinks = downloadLink.value;
-  // 把输就转换为URI，下载要用到的
-  const encodedData = encodeURIComponent(data);
-  if (data) {
-    // 将数据给到链接
-    downloadLinks.href =
-      "data:application/bpmn20-xml;charset=UTF-8," + encodedData;
-    // 设置文件名
-    downloadLinks.download = name;
-    // 触发点击事件开始下载
-    downloadLinks.click();
-  }
-}
-// 导出xml
-const exportXml = async () => {
-  console.log('点击了导出')
-  try {
-    const {xml} = await state.bpmnModeler.saveXML({format: true});
-    // 获取文件名
-    const name = `工作流.bpmn`;
-    // 将文件名以及数据交给下载方法
-    download({name: name, data: xml});
-  } catch (error) {
-    console.error('下载Bpmn失败，请重试')
-  }
-}
-// 导出svg
-
-const exportSvg = async () => {
-  console.log('点击导出svg')
-  try {
-    const {xml} = await state.bpmnModeler.saveXML({format: true});
-    // 获取文件名
-    const name = `流程图.svg`;
-    // 从建模器画布中提取svg图形标签
-    let context = "";
-    const djsGroupAll = canvasBpmn.value.querySelectorAll(".djs-group");
-    for (let item of djsGroupAll) {
-      context += item.innerHTML;
-    }
-    // 获取svg的基本数据，长宽高
-    const viewport = canvasBpmn.value
-      .querySelector(".viewport")
-      .getBBox();
-    // 将标签和数据拼接成一个完整正常的svg图形
-    const svg = `
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="${viewport.width}"
-            height="${viewport.height}"
-            viewBox="${viewport.x} ${viewport.y} ${viewport.width} ${viewport.height}"
-            >
-            ${context}
-          </svg>
-        `;
-    // 将文件名以及数据交给下载方法
-    download({name: name, data: svg});
-  } catch (error) {
-    console.error('下载Svg失败，请重试')
-  }
-}
-// 撤销
-const handelCancel = () => {
-  console.log('点击撤销')
-  state.bpmnModeler.get("commandStack").undo();
-
-}
-//恢复
-const handelReset = () => {
-  console.log('点击恢复')
-  state.bpmnModeler.get("commandStack").redo()
-}
-//放大/缩小
-const handlerZoom = (radio) => {
-  const newScale = !radio ? 1.0 : state.scale + radio;
-  state.bpmnModeler.get("canvas").zoom(newScale);
-  state.scale = newScale;
-}
-// 预览Xml
-const viewXml = async () => {
-  try {
-    const {xml} = await state.bpmnModeler.saveXML({format: true});
-    bpmnValue.value = xml
-    showView.value = true
-  } catch (error) {
-    this.toast.error('预览失败，请重试')
-  }
-}
-// 预览svg
-const viewSvg = async () => {
-  try {
-    const {svg} = await state.bpmnModeler.saveSVG();
-    bpmnValue.value = svg
-    showView.value = true
-  } catch (error) {
-    console.error('预览失败，请重试')
-  }
-}
 // 销毁bpmn
 const destroyBpmn = () => {
   state.bpmnModeler.destroy()
-}
-// Drawer关闭
-const handleDrawerClose = () => {
-  console.log('taskData', taskDateStore.taskData)
-  console.log('关闭抽屉获取数据',)
-  const index = taskDateStore.taskData.findIndex((item) => item.id === state.taskData.id)
-  console.log('index', index)
-  if (index >= 0) {
-    taskDateStore.editElement(index, state.taskData)
-  } else {
-    taskDateStore.setElement(state.taskData)
-  }
-  drawer.value = false
-}
 
+}
+//销毁drawer
+const closeDrawer = ()=>{
+  drawerView.value = false
+  // drawer.value.reset()
+}
+// 测试去空
+const saveX = ()=>{
+  taskDateStore.updataElement()
+  console.log('taskDateStore',taskDateStore.taskData)
+}
 onMounted(() => {
   init()
 })
 </script>
 <style lang='scss' scoped>
-.nav {
-  height: 50px;
-  position: absolute;
-  top: 0;
-  left: 0;
-
-  button {
-    margin-right: 10px;
-  }
-}
-
 .content {
   position: absolute;
   width: 100%;
@@ -416,24 +158,7 @@ onMounted(() => {
     background-color: #eeeeee;
   }
 
-  .showViewClass {
-    position: absolute;
-    z-index: 2;
-    width: 800px;
-    height: 600px;
-    top: calc(50% - 300px);
-    left: calc(50% - 400px);
-    background-color: #f9f9f9;
-    display: flex;
-    justify-content: center;
-    align-items: center;
 
-    .closeView {
-      position: absolute;
-      right: 0;
-      top: 0;
-    }
-  }
 }
 
 
@@ -442,18 +167,5 @@ onMounted(() => {
     font-weight: 700;
   }
 
-  .drawerContentClass {
-    display: flex;
-
-    .leftClass {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .rightClass {
-      display: flex;
-      flex-direction: column;
-    }
-  }
 }
 </style>
