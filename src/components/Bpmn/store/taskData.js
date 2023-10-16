@@ -12,9 +12,9 @@ export default defineStore('taskData', {
             this.taskData[index] = element
         },
         updataElement(allElement) {
-            const newList = this.taskData.filter((ele) => {
-                const newData = allElement.filter((item) => {
-                    return item.id == ele.id
+            let newList = this.taskData.filter((ele) => {
+             return allElement.find((item) => {
+                    return  item.id === ele.id
                 })
             })
             this.taskData = newList

@@ -16,6 +16,9 @@
       <el-form style="width: 100%;" :model="state.taskData" label-width="140px" :inline="true">
         <el-row :gutter="24">
           <el-col :span="8">
+            <el-form-item label="任务名称">
+<el-input v-model="state.taskData.taskName"></el-input>
+            </el-form-item>
             <el-form-item label="处理人类型">
               <div>
                 <el-radio-group v-model="state.taskData.executeType" class="ml-4">
@@ -94,10 +97,13 @@ const props = defineProps({
   },
   taskId: {
     required: true
+  },
+  bpmnModeler:{
+
   }
 
 })
-const {drawerView, taskId} = toRefs(props)
+const {drawerView, taskId,bpmnModeler} = toRefs(props)
 const emits = defineEmits(['closeDrawer'])
 const state = reactive({
   drawerView: false,
@@ -111,7 +117,8 @@ const state = reactive({
       outputIf: '',
       overIf: '',
       resetWhether: '',
-      overWhether: ''
+      overWhether: '',
+      taskName:''
     }
 })
 // 重置state.taskData
@@ -124,12 +131,16 @@ const reset = () => {
     outputIf: '',
     overIf: '',
     resetWhether: '',
-    overWhether: ''
+    overWhether: '',
+    taskName:''
   }
 }
 // Drawer关闭
 const handleDrawerClose = () => {
   console.log('taskData', taskDateStore.taskData)
+  const element = bpmnModeler.value.get('elementRegistry').get(state.taskData.id)
+  const modeling = bpmnModeler.value.get('modeling')
+  modeling.updateLabel(element, state.taskData.taskName)
   const index = taskDateStore.taskData.findIndex((item) => item.id === state.taskData.id)
   if (index >= 0) {
     taskDateStore.editElement(index, state.taskData)

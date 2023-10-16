@@ -15,7 +15,7 @@
     <!--    侧边栏区域-->
     <div class="properties" ref="properties"></div>
     <Drawer ref="drawer" :drawerView="drawerView" :taskId="state.taskId"
-            @closeDrawer="closeDrawer"
+            :bpmnModeler="state.bpmnModeler"     @closeDrawer="closeDrawer"
     />
   </div>
 </template>
@@ -23,6 +23,13 @@
 import {ref, reactive, onMounted} from 'vue'
 // 引入bpmn
 import BpmnModeler from 'bpmn-js/lib/Modeler'
+// bpmn整体样式
+import 'bpmn-js/dist/assets/diagram-js.css'
+import 'bpmn-js/dist/assets/bpmn-font/css/bpmn.css'
+import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-codes.css'
+import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css'
+// bpmn右边工具栏样式
+import '@bpmn-io/properties-panel/dist/assets/properties-panel.css'
 //引入bpmn侧边栏
 import {
   BpmnPropertiesPanelModule,
@@ -93,11 +100,7 @@ const init = () => {
         return false;
       } else {
         if (eventType === 'element.click') {
-          // const elementRegistry = state.bpmnModeler.get('elementRegistry');
-          // const userTaskList = elementRegistry.filter(
-          //   (item) => item.type === 'bpmn:UserTask'
-          // );
-          // console.log('userTaskList',userTaskList)
+
           if (element.type === "bpmn:UserTask") {
             state.taskId = element.id
             drawerView.value = false
@@ -129,9 +132,19 @@ const closeDrawer = ()=>{
   // drawer.value.reset()
 }
 // 测试去空
-const saveX = ()=>{
-  taskDateStore.updataElement()
+const saveX = async ()=>{
+  const elementRegistry = state.bpmnModeler.get('elementRegistry');
+  const userTaskList = elementRegistry.filter(
+    (item) => item.type === 'bpmn:UserTask'
+  );
+  taskDateStore.updataElement(userTaskList)
   console.log('taskDateStore',taskDateStore.taskData)
+  const {xml} = await state.bpmnModeler.saveXML({format: true});
+  const exportData = {
+    taskData:taskDateStore.taskData,
+    xml:xml
+  }
+  console.log('exportData',exportData)
 }
 onMounted(() => {
   init()
