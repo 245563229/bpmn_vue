@@ -137,7 +137,7 @@ const saveX = async ()=>{
   const userTaskList = elementRegistry.filter(
     (item) => item.type === 'bpmn:UserTask'
   );
-  taskDateStore.updateElement(userTaskList)
+  taskDateStore.updataElement(userTaskList)
   console.log('taskDateStore',taskDateStore.taskData)
   const {xml} = await state.bpmnModeler.saveXML({format: true});
   const exportData = {
