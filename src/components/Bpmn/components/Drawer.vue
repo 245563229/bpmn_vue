@@ -138,6 +138,7 @@ const reset = () => {
 // Drawer关闭
 const handleDrawerClose = () => {
   console.log('taskData', taskDateStore.taskData)
+  //获取元素并进行赋值
   const element = bpmnModeler.value.get('elementRegistry').get(state.taskData.id)
   const modeling = bpmnModeler.value.get('modeling')
   modeling.updateLabel(element, state.taskData.taskName)
