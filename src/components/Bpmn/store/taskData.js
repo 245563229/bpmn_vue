@@ -11,7 +11,7 @@ export default defineStore('taskData', {
         editElement(index,element){
             this.taskData[index] = element
         },
-        updataElement(allElement) {
+        updateElement(allElement) {
             let newList = this.taskData.filter((ele) => {
              return allElement.find((item) => {
                     return  item.id === ele.id
