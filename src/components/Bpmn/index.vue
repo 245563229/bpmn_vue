@@ -60,7 +60,16 @@ const state = reactive({
   //选中的任务ID
   taskId:''
 })
-
+// 加载的bpmn居中
+const bpmnCenter = ()=>{
+  const canvas = state.bpmnModeler.get('canvas');
+  const zoom = canvas.zoom();
+  canvas.zoom('fit-viewport');
+  canvas.zoom(zoom);
+  // 迅速平移以确保图在视口中央
+  const viewer = state.bpmnModeler.get('viewer');
+  viewer.get('selection').select();
+}
 const createNewDiagram = (data) => {
   let strValue = xmlStr
   if (data) {
@@ -68,6 +77,9 @@ const createNewDiagram = (data) => {
   }
   try {
    state.bpmnModeler.importXML(strValue)
+    setTimeout(()=>{
+      bpmnCenter()
+    },100)
   } catch (err) {
     console.log(err.message, err.warnings)
   }
